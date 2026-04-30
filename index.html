@@ -194,11 +194,54 @@
   }
   @keyframes pulse{0%,100%{opacity:0.2;transform:scale(0.8);}50%{opacity:1;transform:scale(1.2);}}
 
+  /* RENDERS GALLERY */
+  .renders-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+    gap:1px;
+    background:var(--border);
+    border-top:0.5px solid var(--border);
+    border-bottom:0.5px solid var(--border);
+  }
+  .render-card{
+    background:var(--surface);
+    position:relative;overflow:hidden;
+  }
+  .render-card img{
+    width:100%;height:420px;
+    object-fit:cover;display:block;
+    transition:transform 0.6s ease;
+  }
+  .render-card:hover img{transform:scale(1.03);}
+  .render-info{
+    padding:1.4rem 1.8rem;
+    border-top:0.5px solid var(--border);
+  }
+  .render-number{
+    font-size:9px;letter-spacing:0.2em;color:rgba(255,255,255,0.2);
+    margin-bottom:6px;
+  }
+  .render-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;font-weight:400;color:#fff;margin-bottom:4px;
+  }
+  .render-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:10px;color:var(--muted);letter-spacing:0.1em;
+  }
+  .render-tag{
+    font-size:9px;letter-spacing:0.15em;padding:3px 8px;
+    background:rgba(155,143,232,0.1);color:var(--accent);
+    text-transform:uppercase;
+  }
+
   @media(max-width:700px){
     nav{padding:1rem 1.5rem;}
     .hero{padding:4rem 1.5rem 3rem;}
     .about-section{grid-template-columns:1fr;padding:3rem 1.5rem;}
     .section-label,.contact,footer{padding-left:1.5rem;padding-right:1.5rem;}
+    .renders-grid{grid-template-columns:1fr;}
+    .render-card img{height:280px;}
   }
 </style>
 </head>
@@ -274,6 +317,30 @@
       <div class="model-number">004</div>
       <div class="model-title">Crystalline Study</div>
       <div class="model-meta"><span>Crystal cluster</span><span class="model-tag">Sculpture</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-label">Renders</div>
+
+<div class="renders-grid">
+
+  <div class="render-card">
+    <img src="paris-reimagined.png" alt="Paris Reimagined — Environment Design" loading="lazy">
+    <div class="render-info">
+      <div class="render-number">005</div>
+      <div class="render-title">Paris Reimagined</div>
+      <div class="render-meta"><span>Environment design</span><span class="render-tag">Render</span></div>
+    </div>
+  </div>
+
+  <div class="render-card">
+    <img src="futurist-inaugura.png" alt="Futurist Inaugura" loading="lazy">
+    <div class="render-info">
+      <div class="render-number">006</div>
+      <div class="render-title">Futurist Inaugura</div>
+      <div class="render-meta"><span>Concept art</span><span class="render-tag">Render</span></div>
     </div>
   </div>
 
