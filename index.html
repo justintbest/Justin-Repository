@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Justin Best — 3D Art</title>
+<style>
+  /* Adobe Portfolio uses system Helvetica Neue stack — matching that exactly */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #f2f2f2;
+    --border: #e0e0e0;
+    --text: #111111;
+    --muted: #767676;
+    --light: #aaaaaa;
+    --xlight: #dddddd;
+  }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+  }
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO — no big title, just eyebrow + desc like Adobe Portfolio header ── */
+  .hero {
+    padding: 64px 40px 52px;
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--light);
+    margin-bottom: 20px;
+    font-weight: 400;
+  }
+  .hero-desc {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 560px;
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: gap 0.2s;
+  }
+  .hero-cta::after { content: '→'; font-size: 13px; font-weight: 300; letter-spacing: 0; }
+  .hero-cta:hover { gap: 16px; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    padding: 44px 40px 18px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--light);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── MODEL GALLERY ── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .model-card {
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    border-right: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .model-card:last-child { border-right: none; }
+  .model-card:active { cursor: grabbing; }
+  .model-card:hover { background: #eaeaea; }
+  .model-viewer-wrap {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: var(--surface);
+  }
+  .model-viewer-wrap canvas { display: block; }
+  .model-info {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .model-number {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--xlight);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .model-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .model-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--light);
+  }
+  .model-tag {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    color: var(--light);
+    text-transform: uppercase;
+  }
+  .drag-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--light);
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  .model-card:hover .drag-hint { opacity: 0; }
+
+  /* ── RENDERS GRID ── */
+  .renders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .render-card {
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .render-card:last-child { border-right: none; }
+  .render-img-wrap { overflow: hidden; }
+  .render-card img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+    /* images keep full color — no grayscale filter */
+  }
+  .render-card:hover img { transform: scale(1.03); }
+  .render-info {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .render-number {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--xlight);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .render-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .render-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--light);
+  }
+  .render-tag {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    color: var(--light);
+    text-transform: uppercase;
+  }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    cursor: zoom-out;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    cursor: default;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 28px;
+    font-size: 28px;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    font-weight: 300;
+    line-height: 1;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .lightbox-close:hover { color: #fff; }
+  .lightbox-caption {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── ABOUT ── */
+  .about-band {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .about-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    padding: 72px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .about-section h2 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .about-section p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 14px;
+  }
+  .about-section p:last-child { margin-bottom: 0; }
+  .stats { display: flex; flex-direction: column; }
+  .stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    padding: 22px 0;
+  }
+  .stat-row:first-child { border-top: 1px solid var(--border); }
+  .stat-num {
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── CONTACT ── */
+  .contact {
+    padding: 80px 40px;
+    text-align: center;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--light);
+    margin-bottom: 16px;
+  }
+  .contact h3 {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .contact p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 3px;
+    transition: gap 0.2s, border-color 0.2s;
+  }
+  .contact-link::after { content: '→'; font-size: 13px; font-weight: 300; letter-spacing: 0; }
+  .contact-link:hover { gap: 16px; border-color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  footer span {
+    font-size: 11px;
+    color: var(--light);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── LOADER ── */
+  .loader-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    transition: opacity 0.6s;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .loader-overlay.hidden { opacity: 0; }
+  .loader-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--light);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 820px) {
+    nav { padding: 14px 20px; }
+    .hero { padding: 44px 20px 36px; }
+    .section-label { padding: 32px 20px 14px; }
+    .about-section { grid-template-columns: 1fr; padding: 48px 20px; gap: 36px; }
+    .contact { padding: 60px 20px; }
+    footer { padding: 14px 20px; }
+    .renders-grid { grid-template-columns: 1fr; }
+    .render-card { border-right: none; border-bottom: 1px solid var(--border); }
+    .render-card:last-child { border-bottom: none; }
+    .render-card img { height: 260px; }
+    .gallery { grid-template-columns: 1fr 1fr; }
+    .model-card { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+  @media (max-width: 500px) {
+    .gallery { grid-template-columns: 1fr; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">×</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Justin Best</div>
+  <div class="nav-links">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">3D Artist &amp; Digital Sculptor</div>
+  <p class="hero-desc">Exploring the intersection of geometry and perception. Each model is a study in how form inhabits space — drag to experience them fully.</p>
+  <a class="hero-cta" href="#work">View Collection</a>
+</div>
+
+<!-- MODELS -->
+<div class="section-label" id="work">Selected Works</div>
+
+<div class="gallery">
+
+  <div class="model-card">
+    <div class="model-viewer-wrap" id="wrap-glb">
+      <div class="loader-overlay" id="loader-glb"><div class="loader-dot"></div></div>
+      <canvas id="c-glb" width="400" height="300"></canvas>
+      <div class="drag-hint">drag to rotate</div>
+    </div>
+    <div class="model-info">
+      <div class="model-number">001</div>
+      <div class="model-title">Lone Peak Chandelier</div>
+      <div class="model-meta"><span>Original sculpture</span><span class="model-tag">Featured</span></div>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div class="model-viewer-wrap">
+      <canvas id="c1" width="400" height="300"></canvas>
+      <div class="drag-hint">drag to rotate</div>
+    </div>
+    <div class="model-info">
+      <div class="model-number">002</div>
+      <div class="model-title">Geometric Form I</div>
+      <div class="model-meta"><span>Dodecahedron</span><span class="model-tag">Abstract</span></div>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div class="model-viewer-wrap">
+      <canvas id="c2" width="400" height="300"></canvas>
+      <div class="drag-hint">drag to rotate</div>
+    </div>
+    <div class="model-info">
+      <div class="model-number">003</div>
+      <div class="model-title">Torus Variation</div>
+      <div class="model-meta"><span>Knot geometry</span><span class="model-tag">Experimental</span></div>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div class="model-viewer-wrap">
+      <canvas id="c3" width="400" height="300"></canvas>
+      <div class="drag-hint">drag to rotate</div>
+    </div>
+    <div class="model-info">
+      <div class="model-number">004</div>
+      <div class="model-title">Crystalline Study</div>
+      <div class="model-meta"><span>Crystal cluster</span><span class="model-tag">Sculpture</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RENDERS -->
+<div class="section-label">Renders</div>
+
+<div class="renders-grid">
+
+  <div class="render-card" data-title="Paris Reimagined">
+    <div class="render-img-wrap">
+      <img src="paris-reimagined.png" alt="Paris Reimagined — Environment Design" loading="lazy">
+    </div>
+    <div class="render-info">
+      <div class="render-number">005</div>
+      <div class="render-title">Paris Reimagined</div>
+      <div class="render-meta"><span>Environment design</span><span class="render-tag">Render</span></div>
+    </div>
+  </div>
+
+  <div class="render-card" data-title="Futurist Inaugura">
+    <div class="render-img-wrap">
+      <img src="futurist-inaugura.png" alt="Futurist Inaugura" loading="lazy">
+    </div>
+    <div class="render-info">
+      <div class="render-number">006</div>
+      <div class="render-title">Futurist Inaugura</div>
+      <div class="render-meta"><span>Concept art</span><span class="render-tag">Render</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ABOUT -->
+<div class="section-label" id="about">About</div>
+<div class="about-band">
+  <div class="about-section">
+    <div>
+      <h2>Crafting form from nothing</h2>
+      <p>Justin Best is a digital sculptor working at the intersection of mathematics and visual art. Each piece begins as an equation and ends as something you can hold with your eyes.</p>
+      <p>Working primarily in 3D space, the focus is on how light interacts with geometry — the way a surface catches and releases illumination, and how that creates an emotional response.</p>
+    </div>
+    <div class="stats">
+      <div class="stat-row">
+        <div class="stat-num">48</div>
+        <div class="stat-label">Works in collection</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Years exploring form</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Exhibitions &amp; features</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact" id="contact">
+  <div class="contact-eyebrow">Let's work together</div>
+  <h3>Get in touch</h3>
+  <p>Commissions, collaborations, and inquiries welcome.</p>
+  <a class="contact-link" href="mailto:hello@justinbest.com">hello@justinbest.com</a>
+</div>
+
+<footer>
+  <span>© 2026 Justin Best</span>
+  <span>Built with Three.js</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const GLB_B64 = "Z2xURgIAAAAUEgAAWAgAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Iktocm9ub3MgZ2xURiBCbGVuZGVyIEkvTyB2NS4xLjE4IiwidmVyc2lvbiI6IjIuMCJ9LCJzY2VuZSI6MCwic2NlbmVzIjpbeyJuYW1lIjoiU2NlbmUiLCJub2RlcyI6WzAsMV19XSwibm9kZXMiOlt7Im1lc2giOjAsIm5hbWUiOiJQbGFuZS4wMDEiLCJyb3RhdGlvbiI6Wy0xLDAsMCwxLjYyOTIwNjg0OTQyOTQ2NTRlLTA3XSwic2NhbGUiOlswLjY5NDIzMjQwNDIzMjAyNTEsMC41MjA2NDAxOTQ0MTYwNDYxLDAuNTIwNjQwMDE1NjAyMTExOF0sInRyYW5zbGF0aW9uIjpbLTMxLjEzNDY0NzM2OTM4NDc2NiwtMS44NzYyOTEwMzY2MDU4MzUsLTE1LjAwMDIwMzEzMjYyOTM5NV19LHsibWVzaCI6MCwibmFtZSI6IlBsYW5lLjAwMyIsInJvdGF0aW9uIjpbLTEsMCwwLDEuNjI5MjA2ODQ5NDI5NDY1NGUtMDddLCJzY2FsZSI6WzAuNjk0MjMyNDA0MjMyMDI1MSwwLjUyMDY0MDE5NDQxNjA0NjEsMC41MjA2NDAxOTQ0MTYwNDYxXSwidHJhbnNsYXRpb24iOlstMzEuMTM0NjQ3MzY5Mzg0NzY2LC0xLjg3NjI5MTAzNjYwNTgzNSwtMTUuMDAwMjAzMTMyNjI5Mzk1XX1dLCJtYXRlcmlhbHMiOlt7ImRvdWJsZVNpZGVkIjp0cnVlLCJuYW1lIjoiTWF0ZXJpYWwiLCJwYnJNZXRhbGxpY1JvdWdobmVzcyI6eyJiYXNlQ29sb3JGYWN0b3IiOlswLjgwMDAwMDAxMTkyMDkyOSwwLjgwMDAwMDAxMTkyMDkyOSwwLjgwMDAwMDAxMTkyMDkyOSwxXSwibWV0YWxsaWNGYWN0b3IiOjAsInJvdWdobmVzc0ZhY3RvciI6MC41fX1dLCJtZXNoZXMiOlt7ImV4dHJhcyI6eyJ0YXJnZXROYW1lcyI6WyJLZXkgMSJdfSwibmFtZSI6IlBsYW5lLjAwMiIsInByaW1pdGl2ZXMiOlt7ImF0dHJpYnV0ZXMiOnsiUE9TSVRJT04iOjAsIk5PUk1BTCI6MSwiVEVYQ09PUkRfMCI6Mn0sImluZGljZXMiOjMsIm1hdGVyaWFsIjowLCJ0YXJnZXRzIjpbeyJQT1NJVElPTiI6NCwiTk9STUFMIjo1fV19XSwid2VpZ2h0cyI6WzFdfV0sImFjY2Vzc29ycyI6W3siYnVmZmVyVmlldyI6MCwiY29tcG9uZW50VHlwZSI6NTEyNiwiY291bnQiOjQ4LCJtYXgiOlszLjIzOTA5NDQ5NTc3MzMxNTQsNy40NTA1ODA1OTY5MjM4MjhlLTA4LDExLjEwODY2NjQxOTk4MjkxXSwibWluIjpbLTMuMzg2MTA2MjUyNjcwMjg4LDcuNDUwNTgwNTk2OTIzODI4ZS0wOCwtMzUuMTY0NjcyODUxNTYyNV0sInR5cGUiOiJWRUMzIn0seyJidWZmZXJWaWV3IjoxLCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsInR5cGUiOiJWRUMzIn0seyJidWZmZXJWaWV3IjoyLCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsInR5cGUiOiJWRUMyIn0seyJidWZmZXJWaWV3IjozLCJjb21wb25lbnRUeXBlIjo1MTIzLCJjb3VudCI6MTY4LCJ0eXBlIjoiU0NBTEFSIn0seyJidWZmZXJWaWV3Ijo0LCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsIm1heCI6WzAuNzM0OTMwMjc2ODcwNzI3NSwwLDEuNzA0MjQ4NDI4MzQ0NzI2Nl0sIm1pbiI6Wy0xLjMxMzA4NzcwMTc5NzQ4NTQsMCwtMS43OTAwNTQzMjEyODkwNjI1XSwidHlwZSI6IlZFQzMifSx7ImNvbXBvbmVudFR5cGUiOjUxMjYsImNvdW50Ijo0OCwic3BhcnNlIjp7ImNvdW50IjoxLCJpbmRpY2VzIjp7ImJ1ZmZlclZpZXciOjUsImNvbXBvbmVudFR5cGUiOjUxMjF9LCJ2YWx1ZXMiOnsiYnVmZmVyVmlldyI6Nn19LCJ0eXBlIjoiVkVDMyJ9XSwiYnVmZmVyVmlld3MiOlt7ImJ1ZmZlciI6MCwiYnl0ZUxlbmd0aCI6NTc2LCJieXRlT2Zmc2V0IjowLCJ0YXJnZXQiOjM0OTYyfSx7ImJ1ZmZlciI6MCwiYnl0ZUxlbmd0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";
+
+/* ── LIGHTBOX ── */
+(function(){
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  const lbCap = document.getElementById('lightbox-caption');
+  const lbClose = document.getElementById('lightbox-close');
+  function open(src, alt, title) {
+    lbImg.src = src; lbImg.alt = alt;
+    lbCap.textContent = title || alt;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    lb.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => { lbImg.src = ''; }, 300);
+  }
+  document.querySelectorAll('.render-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const img = card.querySelector('img');
+      open(img.src, img.alt, card.getAttribute('data-title'));
+    });
+  });
+  lbClose.addEventListener('click', close);
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
+
+/* ── 3D CONTROLS — mobile scroll fix ── */
+function setupControls(canvas, card, getVel, setVel, getAuto, setAuto){
+  let dragging = false, lastX = 0, lastY = 0;
+  card.addEventListener('mousedown', e => { dragging=true; setAuto(false); lastX=e.clientX; lastY=e.clientY; e.preventDefault(); });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const v = getVel();
+    setVel(v.x+(e.clientY-lastY)*0.012, v.y+(e.clientX-lastX)*0.012);
+    lastX=e.clientX; lastY=e.clientY;
+  });
+  window.addEventListener('mouseup', () => { if(dragging){dragging=false;setTimeout(()=>setAuto(true),2000);} });
+
+  let touchIntent = null;
+  card.addEventListener('touchstart', e => { touchIntent=null; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }, {passive:true});
+  card.addEventListener('touchmove', e => {
+    const dx=Math.abs(e.touches[0].clientX-lastX), dy=Math.abs(e.touches[0].clientY-lastY);
+    if (touchIntent===null && (dx>4||dy>4)) touchIntent = dx>dy ? 'rotate' : 'scroll';
+    if (touchIntent==='rotate') {
+      e.preventDefault();
+      dragging=true; setAuto(false);
+      const v=getVel();
+      setVel(v.x+(e.touches[0].clientY-lastY)*0.012, v.y+(e.touches[0].clientX-lastX)*0.012);
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    }
+  }, {passive:false});
+  card.addEventListener('touchend', () => { if(dragging){dragging=false;setTimeout(()=>setAuto(true),2000);} touchIntent=null; });
+}
+
+function b64ToArrayBuffer(b64){
+  const bin=atob(b64), buf=new ArrayBuffer(bin.length), v=new Uint8Array(buf);
+  for(let i=0;i<bin.length;i++) v[i]=bin.charCodeAt(i);
+  return buf;
+}
+
+function makeBasicScene(canvasId, createGeo){
+  const canvas=document.getElementById(canvasId);
+  const card=canvas.closest('.model-card');
+  const wrap=canvas.closest('.model-viewer-wrap');
+  const w=wrap.clientWidth||400, h=300;
+  canvas.width=w; canvas.height=h;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(w,h); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0,0);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,w/h,0.1,100);
+  camera.position.set(0,0,4.5);
+  scene.add(new THREE.AmbientLight(0xffffff,0.7));
+  const l1=new THREE.DirectionalLight(0xffffff,1.0); l1.position.set(2,3,3); scene.add(l1);
+  const l2=new THREE.DirectionalLight(0xcccccc,0.4); l2.position.set(-2,-1,-2); scene.add(l2);
+  /* grayscale material — dark charcoal */
+  const mesh=new THREE.Mesh(createGeo(), new THREE.MeshStandardMaterial({color:0x333333, metalness:0.5, roughness:0.3}));
+  scene.add(mesh);
+  let rotX=0.3,rotY=0.4,velX=0,velY=0,autoRotate=true;
+  setupControls(canvas,card,()=>({x:velX,y:velY}),(x,y)=>{velX=x;velY=y;},()=>autoRotate,v=>autoRotate=v);
+  (function animate(){requestAnimationFrame(animate);if(autoRotate)velY+=0.004;velX*=0.92;velY*=0.92;rotX+=velX;rotY+=velY;mesh.rotation.x=rotX;mesh.rotation.y=rotY;renderer.render(scene,camera);})();
+}
+
+function loadGLBScene(){
+  const canvas=document.getElementById('c-glb');
+  const card=canvas.closest('.model-card');
+  const wrap=document.getElementById('wrap-glb');
+  const loader_el=document.getElementById('loader-glb');
+  const w=wrap.clientWidth||400,h=300;
+  canvas.width=w; canvas.height=h;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(w,h); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0,0);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,w/h,0.1,1000);
+  camera.position.set(0,0,80);
+  scene.add(new THREE.AmbientLight(0xffffff,0.8));
+  const l1=new THREE.DirectionalLight(0xffffff,1.2); l1.position.set(5,10,8); scene.add(l1);
+  const l2=new THREE.DirectionalLight(0xaaaaaa,0.5); l2.position.set(-5,-3,-5); scene.add(l2);
+  const l3=new THREE.DirectionalLight(0xffffff,0.3); l3.position.set(0,0,10); scene.add(l3);
+
+  const buf=b64ToArrayBuffer(GLB_B64);
+  const jsonLength=new Uint32Array(buf,12,1)[0];
+  const gltf=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,20,jsonLength)));
+  const binBuffer=buf.slice(20+jsonLength+8);
+
+  function getAccessorData(i){
+    const acc=gltf.accessors[i], bv=gltf.bufferViews[acc.bufferView];
+    const off=(bv.byteOffset||0)+(acc.byteOffset||0);
+    const n={'SCALAR':1,'VEC2':2,'VEC3':3,'VEC4':4,'MAT4':16}[acc.type];
+    const T={5120:Int8Array,5121:Uint8Array,5122:Int16Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType];
+    return new T(binBuffer,off,acc.count*n);
+  }
+
+  const group=new THREE.Group();
+  gltf.meshes.forEach(m=>m.primitives.forEach(p=>{
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(getAccessorData(p.attributes.POSITION)),3));
+    if(p.attributes.NORMAL!=null) geo.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(getAccessorData(p.attributes.NORMAL)),3));
+    if(p.indices!=null) geo.setIndex(new THREE.BufferAttribute(new Uint16Array(getAccessorData(p.indices)),1));
+    if(!p.attributes.NORMAL) geo.computeVertexNormals();
+    /* override GLB material color with grayscale */
+    group.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x444444,metalness:0.4,roughness:0.4,side:THREE.DoubleSide})));
+  }));
+
+  gltf.nodes.forEach(n=>{if(n.rotation) group.quaternion.multiply(new THREE.Quaternion(n.rotation[0],n.rotation[1],n.rotation[2],n.rotation[3]));});
+
+  const box=new THREE.Box3().setFromObject(group);
+  const center=box.getCenter(new THREE.Vector3());
+  const size=box.getSize(new THREE.Vector3());
+  const scale=50/Math.max(size.x,size.y,size.z);
+  group.position.sub(center.multiplyScalar(scale));
+  group.scale.setScalar(scale);
+  scene.add(group);
+  loader_el.classList.add('hidden');
+
+  let rotX=0,rotY=0,velX=0,velY=0,autoRotate=true;
+  setupControls(canvas,card,()=>({x:velX,y:velY}),(x,y)=>{velX=x;velY=y;},()=>autoRotate,v=>autoRotate=v);
+  (function animate(){requestAnimationFrame(animate);if(autoRotate)velY+=0.004;velX*=0.92;velY*=0.92;rotX+=velX;rotY+=velY;group.rotation.x=rotX;group.rotation.y=rotY;renderer.render(scene,camera);})();
+}
+
+loadGLBScene();
+makeBasicScene('c1',()=>new THREE.DodecahedronGeometry(1.5,0));
+makeBasicScene('c2',()=>new THREE.TorusKnotGeometry(1.0,0.35,128,16,2,3));
+makeBasicScene('c3',()=>{
+  const positions=[];
+  for(let i=0;i<7;i++){
+    const g=new THREE.ConeGeometry(0.18+Math.random()*0.12,0.6+Math.random()*0.8,5,1);
+    const m=new THREE.Matrix4();
+    const angle=(i/7)*Math.PI*2,r=0.4+Math.random()*0.5;
+    m.makeTranslation(Math.cos(angle)*r,-0.4+Math.random()*0.5,Math.sin(angle)*r);
+    m.multiply(new THREE.Matrix4().makeRotationX(-Math.PI/2+(Math.random()-0.5)*0.5));
+    g.applyMatrix4(m); positions.push(...g.getAttribute('position').array);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(positions),3));
+  geo.computeVertexNormals(); return geo;
+});
+</script>
+</body>
+</html>
