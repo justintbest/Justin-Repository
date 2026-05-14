@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Models — Justin Best</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f9f7;
+    --text: #111111;
+    --muted: #666666;
+    --light: #aaaaaa;
+    --border: #e4e4e0;
+    --surface: #f0f0ee;
+    --menu-bg: #1a1a1a;
+    --viewer-bg: #0e0e0e;
+  }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 28px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo a {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-menu-btn {
+    position: absolute;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 6px 2px;
+  }
+  .nav-menu-btn span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--text);
+  }
+
+  /* ── MENU OVERLAY ── */
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--menu-bg);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .menu-overlay.open { opacity: 1; pointer-events: all; }
+  .menu-overlay-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 28px;
+  }
+  .menu-logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+  .menu-close {
+    position: absolute;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 300;
+    line-height: 1;
+    font-family: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .menu-close:hover { opacity: 1; }
+  .menu-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .menu-links a {
+    font-size: clamp(36px, 8vw, 60px);
+    font-weight: 400;
+    color: #ffffff;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    transition: opacity 0.15s;
+  }
+  .menu-links a:hover { opacity: 0.35; }
+  .menu-links a.current { opacity: 0.3; pointer-events: none; }
+
+  /* ── PAGE ── */
+  .page { padding-top: 62px; }
+
+  /* ── HERO ── */
+  .models-hero {
+    padding: 72px 28px 60px;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--light);
+    margin-bottom: 20px;
+  }
+  .models-hero-title {
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .models-hero-desc {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* ── GRID ── */
+  .models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── CARD ── */
+  .model-card {
+    position: relative;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .model-card:last-child { border-right: none; }
+  .model-card:hover .thumb-explore { opacity: 1; }
+  .model-card:hover .drag-hint { opacity: 0; }
+
+  .model-thumb-wrap {
+    position: relative;
+    width: 100%;
+    height: clamp(300px, 44vw, 520px);
+    background: var(--surface);
+  }
+  .model-thumb-wrap canvas {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .thumb-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    transition: opacity 0.6s;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .thumb-loader.hidden { opacity: 0; }
+  .loader-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--light);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.2; transform: scale(0.8); }
+    50%      { opacity: 1;   transform: scale(1.2); }
+  }
+
+  .thumb-explore {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .thumb-explore span {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.92);
+    background: rgba(0,0,0,0.52);
+    padding: 9px 20px;
+  }
+
+  .drag-hint {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: rgba(0,0,0,0.25);
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    z-index: 3;
+  }
+
+  .work-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 56px 24px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .work-caption-sub {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 5px;
+  }
+  .work-caption-title {
+    font-size: clamp(16px, 2.4vw, 22px);
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .work-caption-num {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.12em;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  /* ── VIEWER MODAL ── */
+  .viewer-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--viewer-bg);
+    z-index: 800;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .viewer-modal.open { opacity: 1; pointer-events: all; }
+
+  #viewer-canvas {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .viewer-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    padding: 20px 28px;
+    /* subtle gradient so text reads over bright models */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%);
+  }
+  .viewer-info { flex: 1; min-width: 0; }
+  .viewer-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: -0.01em;
+  }
+  .viewer-sub {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-top: 3px;
+  }
+  .viewer-controls-hint {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+    white-space: nowrap;
+    margin-right: 28px;
+  }
+  .viewer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.45);
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1;
+    font-family: inherit;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+  .viewer-close:hover { color: #fff; }
+
+  .viewer-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .viewer-loader.hidden { opacity: 0; }
+  .viewer-loader-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer span {
+    font-size: 11px;
+    color: var(--light);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .models-hero { padding: 52px 20px 40px; }
+    .models-grid { grid-template-columns: 1fr; }
+    nav { padding: 18px 20px; }
+    .nav-menu-btn { right: 20px; }
+    .viewer-bar { padding: 16px 20px; }
+    .viewer-controls-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menu-overlay" aria-hidden="true">
+  <div class="menu-overlay-top">
+    <span class="menu-logo">Justin Best</span>
+    <button class="menu-close" id="menu-close" aria-label="Close menu">×</button>
+  </div>
+  <div class="menu-links">
+    <a href="index.html" class="menu-nav-link">Work</a>
+    <a href="index.html#about" class="menu-nav-link">About</a>
+    <a href="index.html#contact" class="menu-nav-link">Contact</a>
+    <a href="models.html" class="menu-nav-link current">Models</a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><a href="index.html">Justin Best</a></div>
+  <button class="nav-menu-btn" id="menu-open" aria-label="Open menu">
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<div class="page">
+
+  <div class="models-hero">
+    <div class="section-label">3D Models</div>
+    <h1 class="models-hero-title">Explorable Sculptures</h1>
+    <p class="models-hero-desc">Interactive three-dimensional works.<br>Click any model to open the full-screen viewer.</p>
+  </div>
+
+  <div class="models-grid">
+
+    <div class="model-card"
+         data-src="Tennis5.glb"
+         data-name="Tennis 5"
+         data-sub="Original sculpture · 2026">
+      <div class="model-thumb-wrap">
+        <canvas class="thumb-canvas"></canvas>
+        <div class="thumb-loader"><div class="loader-dot"></div></div>
+        <div class="drag-hint">Drag to rotate</div>
+        <div class="thumb-explore"><span>Click to explore</span></div>
+        <div class="work-caption">
+          <div>
+            <div class="work-caption-sub">Original sculpture</div>
+            <div class="work-caption-title">Tennis 5</div>
+          </div>
+          <div class="work-caption-num">001</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>© 2026 Justin Best</span>
+    <span>Built with Three.js</span>
+  </footer>
+
+</div><!-- /page -->
+
+<!-- FULL-SCREEN VIEWER -->
+<div class="viewer-modal" id="viewer-modal" aria-hidden="true">
+  <div class="viewer-bar">
+    <div class="viewer-info">
+      <div class="viewer-title" id="viewer-title"></div>
+      <div class="viewer-sub" id="viewer-sub"></div>
+    </div>
+    <div class="viewer-controls-hint">Drag · Scroll to zoom · Right-click to pan</div>
+    <button class="viewer-close" id="viewer-close" aria-label="Close viewer">×</button>
+  </div>
+  <canvas id="viewer-canvas"></canvas>
+  <div class="viewer-loader" id="viewer-loader"><div class="viewer-loader-dot"></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ── MENU ── */
+(function () {
+  const overlay = document.getElementById('menu-overlay');
+  const openBtn  = document.getElementById('menu-open');
+  const closeBtn = document.getElementById('menu-close');
+  function openMenu()  { overlay.classList.add('open');    overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function closeMenu() { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');  document.body.style.overflow=''; }
+  openBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+  document.querySelectorAll('.menu-nav-link').forEach(a => a.addEventListener('click', closeMenu));
+})();
+
+/* ── HELPERS ── */
+function fitToCamera(model, camera, controls) {
+  const box    = new THREE.Box3().setFromObject(model);
+  const center = box.getCenter(new THREE.Vector3());
+  const size   = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+
+  model.position.sub(center); // move to world origin
+
+  const fovRad   = camera.fov * Math.PI / 180;
+  const distance = (maxDim / (2 * Math.tan(fovRad / 2))) * 1.6;
+
+  camera.position.set(distance * 0.55, distance * 0.3, distance);
+  camera.near = distance / 100;
+  camera.far  = distance * 100;
+  camera.updateProjectionMatrix();
+
+  if (controls) {
+    controls.target.set(0, 0, 0);
+    controls.minDistance = distance * 0.1;
+    controls.maxDistance = distance * 8;
+    controls.update();
+  }
+
+  return distance;
+}
+
+/* ── THUMBNAIL SETUP ── */
+function setupThumbnail(card) {
+  const wrap   = card.querySelector('.model-thumb-wrap');
+  const canvas = card.querySelector('.thumb-canvas');
+  const loader = card.querySelector('.thumb-loader');
+  const src    = card.dataset.src;
+
+  const w = wrap.clientWidth  || 480;
+  const h = wrap.clientHeight || 360;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: false, antialias: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0xf0f0ee, 1);
+  renderer.outputEncoding    = THREE.sRGBEncoding;
+  renderer.physicallyCorrectLights = true;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, w / h, 0.001, 1000);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const l1 = new THREE.DirectionalLight(0xffffff, 1.2); l1.position.set(3, 5, 4);   scene.add(l1);
+  const l2 = new THREE.DirectionalLight(0xdde8ff, 0.4); l2.position.set(-3, -1, -3); scene.add(l2);
+
+  const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.load(src, (gltf) => {
+    const model = gltf.scene;
+    scene.add(model);
+    fitToCamera(model, camera, null);
+    loader.classList.add('hidden');
+
+    let rotY = 0;
+    (function tick() {
+      requestAnimationFrame(tick);
+      rotY += 0.005;
+      model.rotation.y = rotY;
+      renderer.render(scene, camera);
+    })();
+  }, undefined, (err) => {
+    console.warn('Thumbnail load error:', err);
+    loader.classList.add('hidden');
+  });
+}
+
+document.querySelectorAll('.model-card').forEach(setupThumbnail);
+
+/* ── VIEWER MODAL ── */
+const viewerModal  = document.getElementById('viewer-modal');
+const viewerCanvas = document.getElementById('viewer-canvas');
+const viewerTitle  = document.getElementById('viewer-title');
+const viewerSub    = document.getElementById('viewer-sub');
+const viewerClose  = document.getElementById('viewer-close');
+const viewerLoader = document.getElementById('viewer-loader');
+
+let _renderer = null, _controls = null, _animId = null, _resizeFn = null;
+
+function openViewer(name, sub, src) {
+  viewerTitle.textContent = name;
+  viewerSub.textContent   = sub;
+  viewerLoader.classList.remove('hidden');
+  viewerModal.classList.add('open');
+  viewerModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  _renderer = new THREE.WebGLRenderer({ canvas: viewerCanvas, antialias: true });
+  _renderer.setSize(w, h);
+  _renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  _renderer.setClearColor(0x0e0e0e, 1);
+  _renderer.outputEncoding    = THREE.sRGBEncoding;
+  _renderer.physicallyCorrectLights = true;
+  _renderer.shadowMap.enabled = false;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, w / h, 0.001, 1000);
+
+  // Richer lighting for full-screen viewer
+  scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+  const l1 = new THREE.DirectionalLight(0xffffff, 1.6); l1.position.set(4, 6, 5);    scene.add(l1);
+  const l2 = new THREE.DirectionalLight(0x8899ff, 0.35); l2.position.set(-4, -2, -4); scene.add(l2);
+  const l3 = new THREE.DirectionalLight(0xffeedd, 0.2);  l3.position.set(0, -5, 3);   scene.add(l3);
+
+  _controls = new THREE.OrbitControls(camera, viewerCanvas);
+  _controls.enableDamping  = true;
+  _controls.dampingFactor  = 0.07;
+  _controls.autoRotate     = true;
+  _controls.autoRotateSpeed = 1.0;
+  _controls.screenSpacePanning = true;
+
+  const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.load(src, (gltf) => {
+    const model = gltf.scene;
+    scene.add(model);
+    fitToCamera(model, camera, _controls);
+    viewerLoader.classList.add('hidden');
+  }, undefined, (err) => {
+    console.warn('Viewer load error:', err);
+    viewerLoader.classList.add('hidden');
+  });
+
+  // Stop auto-rotate on first user interaction
+  _controls.addEventListener('start', () => { _controls.autoRotate = false; });
+
+  function tick() {
+    _animId = requestAnimationFrame(tick);
+    _controls.update();
+    _renderer.render(scene, camera);
+  }
+  tick();
+
+  _resizeFn = () => {
+    const nw = window.innerWidth, nh = window.innerHeight;
+    camera.aspect = nw / nh;
+    camera.updateProjectionMatrix();
+    _renderer.setSize(nw, nh);
+  };
+  window.addEventListener('resize', _resizeFn);
+}
+
+function closeViewer() {
+  viewerModal.classList.remove('open');
+  viewerModal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+
+  if (_animId)   { cancelAnimationFrame(_animId); _animId = null; }
+  if (_controls) { _controls.dispose(); _controls = null; }
+  if (_renderer) { _renderer.dispose(); _renderer = null; }
+  if (_resizeFn) { window.removeEventListener('resize', _resizeFn); _resizeFn = null; }
+}
+
+document.querySelectorAll('.model-card').forEach(card => {
+  card.addEventListener('click', () => {
+    openViewer(card.dataset.name, card.dataset.sub, card.dataset.src);
+  });
+});
+
+viewerClose.addEventListener('click', closeViewer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+</script>
+</body>
+</html>
