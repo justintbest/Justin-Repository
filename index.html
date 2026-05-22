@@ -168,43 +168,23 @@
     0%,100% { opacity: 0.2; } 50% { opacity: 1; }
   }
 
-  /* drag hint */
-  .drag-hint {
+  /* hold-to-reveal title */
+  .piece-label {
     position: absolute;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.22);
-    pointer-events: none;
-    white-space: nowrap;
-    transition: opacity 0.3s;
-    z-index: 3;
-  }
-  .piece:hover .drag-hint { opacity: 0; }
-
-  /* caption */
-  .piece-caption {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 11px 0 12px;
-    margin: 0 24px;
-    border-bottom: 1px solid #ebebeb;
-  }
-  .piece-title {
-    font-size: 12px;
+    bottom: 22px;
+    left: 24px;
+    font-size: 13px;
     font-weight: 400;
-    color: #111;
-    letter-spacing: 0.01em;
+    color: #fff;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    transition: opacity 0.12s;
+    pointer-events: none;
+    z-index: 5;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.45);
+    user-select: none;
   }
-  .piece-meta {
-    font-size: 11px;
-    color: #bbb;
-    letter-spacing: 0.06em;
-  }
+  .piece-media.showing .piece-label { opacity: 1; }
 
   /* ── FOOTER ── */
   footer {
@@ -219,53 +199,15 @@
     letter-spacing: 0.06em;
   }
 
-  /* ── LIGHTBOX ── */
-  .lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.93);
-    z-index: 500;
-    align-items: center;
-    justify-content: center;
-    cursor: zoom-out;
-  }
-  .lightbox.active { display: flex; }
-  .lightbox img {
-    max-width: 92vw;
-    max-height: 90vh;
-    object-fit: contain;
-    cursor: default;
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 20px; right: 28px;
-    font-size: 26px;
-    color: rgba(255,255,255,0.45);
-    cursor: pointer;
-    font-weight: 300;
-    background: none;
-    border: none;
-    font-family: inherit;
-    line-height: 1;
-  }
-  .lightbox-close:hover { color: #fff; }
-
   @media (max-width: 600px) {
     nav { padding: 14px 18px; }
-    .piece-caption { margin: 0 18px; padding: 10px 0 11px; }
     .info-panel { padding: 72px 24px 40px; }
     footer { padding: 22px 18px; }
+    .piece-label { bottom: 16px; left: 18px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lb-close">×</button>
-  <img id="lb-img" src="" alt="">
-</div>
 
 <!-- INFO OVERLAY (click-away) -->
 <div class="info-overlay" id="info-overlay"></div>
@@ -297,22 +239,15 @@
     <div class="piece-media" id="wrap-glb">
       <div class="loader" id="loader-glb"><div class="loader-dot"></div></div>
       <canvas id="c-glb"></canvas>
-      <div class="drag-hint">Drag to rotate</div>
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Lone Peak Chandelier</span>
-      <span class="piece-meta">3D sculpture &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Lone Peak Chandelier</div>
     </div>
   </div>
 
   <!-- 02 — Paris Reimagined -->
-  <div class="piece piece-img" data-title="Paris Reimagined" data-src="paris-reimagined.png">
+  <div class="piece">
     <div class="piece-media">
       <img src="paris-reimagined.png" alt="Paris Reimagined" loading="lazy">
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Paris Reimagined</span>
-      <span class="piece-meta">Environment design &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Paris Reimagined</div>
     </div>
   </div>
 
@@ -320,22 +255,15 @@
   <div class="piece">
     <div class="piece-media">
       <canvas id="c1"></canvas>
-      <div class="drag-hint">Drag to rotate</div>
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Geometric Form I</span>
-      <span class="piece-meta">Dodecahedron &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Geometric Form I</div>
     </div>
   </div>
 
   <!-- 04 — Futurist Inaugura -->
-  <div class="piece piece-img" data-title="Futurist Inaugura" data-src="futurist-inaugura.png">
+  <div class="piece">
     <div class="piece-media">
       <img src="futurist-inaugura.png" alt="Futurist Inaugura" loading="lazy">
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Futurist Inaugura</span>
-      <span class="piece-meta">Concept art &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Futurist Inaugura</div>
     </div>
   </div>
 
@@ -343,11 +271,7 @@
   <div class="piece">
     <div class="piece-media">
       <canvas id="c2"></canvas>
-      <div class="drag-hint">Drag to rotate</div>
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Torus Variation</span>
-      <span class="piece-meta">Knot geometry &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Torus Variation</div>
     </div>
   </div>
 
@@ -355,15 +279,11 @@
   <div class="piece">
     <div class="piece-media">
       <canvas id="c3"></canvas>
-      <div class="drag-hint">Drag to rotate</div>
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Crystalline Study</span>
-      <span class="piece-meta">Crystal cluster &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Crystalline Study</div>
     </div>
   </div>
 
-  <!-- 07 — Walking Figure (interactive) -->
+  <!-- 07 — Walking Figure -->
   <div class="piece">
     <div class="piece-media" style="background:#111;">
       <model-viewer
@@ -377,10 +297,7 @@
         exposure="1.1"
         alt="Animated 3D walking figure">
       </model-viewer>
-    </div>
-    <div class="piece-caption">
-      <span class="piece-title">Walking Figure</span>
-      <span class="piece-meta">Animated 3D &nbsp;·&nbsp; 2025</span>
+      <div class="piece-label">Walking Figure</div>
     </div>
   </div>
 
@@ -410,21 +327,16 @@ const GLB_B64 = "Z2xURgIAAAAUEgAAWAgAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Iktocm9
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 })();
 
-/* ── LIGHTBOX ── */
-(function(){
-  const lb    = document.getElementById('lightbox');
-  const lbImg = document.getElementById('lb-img');
-  const lbClose = document.getElementById('lb-close');
-  function open(src, alt) { lbImg.src = src; lbImg.alt = alt; lb.classList.add('active'); document.body.style.overflow = 'hidden'; }
-  function close() { lb.classList.remove('active'); document.body.style.overflow = ''; setTimeout(() => lbImg.src = '', 200); }
-  document.querySelectorAll('.piece-img').forEach(p => {
-    p.style.cursor = 'zoom-in';
-    p.addEventListener('click', () => open(p.dataset.src, p.dataset.title));
-  });
-  lbClose.addEventListener('click', close);
-  lb.addEventListener('click', e => { if (e.target === lb) close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-})();
+/* ── HOLD TO REVEAL TITLE ── */
+document.querySelectorAll('.piece-media').forEach(media => {
+  function show() { media.classList.add('showing'); }
+  function hide() { media.classList.remove('showing'); }
+  media.addEventListener('mousedown', show);
+  window.addEventListener('mouseup', hide);
+  media.addEventListener('touchstart', show, { passive: true });
+  media.addEventListener('touchend', hide);
+  media.addEventListener('touchcancel', hide);
+});
 
 /* ── 3D CONTROLS ── */
 function setupControls(canvas, card, getVel, setVel, getAuto, setAuto){
