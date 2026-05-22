@@ -105,20 +105,22 @@
 
   /* ── WORK FEED ── */
   .feed {
-    padding-top: 54px;
+    padding-top: 50px;
   }
 
   .piece {
     width: 100%;
-    border-bottom: 1px solid #e8e8e8;
   }
 
   .piece-media {
     width: 100%;
-    height: 90vh;
+    /* cinematic ratio: full-width × 9/16 */
+    height: 56.25vw;
+    min-height: 300px;
+    max-height: 88vh;
     position: relative;
     overflow: hidden;
-    background: #f2f2f0;
+    background: #f0f0ee;
     display: block;
   }
 
@@ -188,18 +190,20 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 14px 28px 15px;
+    padding: 11px 0 12px;
+    margin: 0 24px;
+    border-bottom: 1px solid #ebebeb;
   }
   .piece-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     color: #111;
     letter-spacing: 0.01em;
   }
   .piece-meta {
     font-size: 11px;
-    color: #aaa;
-    letter-spacing: 0.08em;
+    color: #bbb;
+    letter-spacing: 0.06em;
   }
 
   /* ── FOOTER ── */
@@ -248,11 +252,10 @@
   .lightbox-close:hover { color: #fff; }
 
   @media (max-width: 600px) {
-    nav { padding: 16px 20px; }
-    .piece-caption { padding: 12px 20px 14px; }
-    .piece-media { height: 70vh; }
+    nav { padding: 14px 18px; }
+    .piece-caption { margin: 0 18px; padding: 10px 0 11px; }
     .info-panel { padding: 72px 24px 40px; }
-    footer { padding: 22px 20px; }
+    footer { padding: 22px 18px; }
   }
 </style>
 </head>
