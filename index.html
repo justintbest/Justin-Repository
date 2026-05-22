@@ -3,347 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Justin Best — 3D Art</title>
+<title>Justin Best</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #f9f9f7;
-    --text: #111111;
-    --muted: #666666;
-    --light: #aaaaaa;
-    --border: #e4e4e0;
-    --surface: #f0f0ee;
-    --menu-bg: #1a1a1a;
-  }
-
   html {
-    background: var(--bg);
-    color: var(--text);
+    background: #fff;
+    color: #111;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  body { min-height: 100vh; }
 
   /* ── NAV ── */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
-    z-index: 300;
+    z-index: 100;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px 28px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
+    justify-content: space-between;
+    padding: 18px 28px;
+    background: #fff;
   }
-  .nav-logo {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text);
+  .nav-name {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: #111;
+    text-decoration: none;
   }
-  .nav-menu-btn {
-    position: absolute;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
+  .nav-info {
+    font-size: 13px;
+    font-weight: 400;
+    color: #111;
+    text-decoration: none;
+    letter-spacing: 0.04em;
     cursor: pointer;
+  }
+  .nav-info:hover { opacity: 0.4; }
+
+  /* ── INFO PANEL ── */
+  .info-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(400px, 100vw);
+    height: 100vh;
+    background: #fff;
+    z-index: 200;
+    padding: 80px 36px 48px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 6px 2px;
+    justify-content: space-between;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+    border-left: 1px solid #e8e8e8;
   }
-  .nav-menu-btn span {
-    display: block;
-    width: 22px;
-    height: 1.5px;
-    background: var(--text);
+  .info-panel.open { transform: translateX(0); }
+  .info-close {
+    position: absolute;
+    top: 18px; right: 28px;
+    background: none; border: none;
+    font-size: 22px; font-weight: 300;
+    cursor: pointer; color: #111;
+    font-family: inherit;
+    line-height: 1;
   }
-
-  /* ── MENU OVERLAY ── */
-  .menu-overlay {
+  .info-close:hover { opacity: 0.4; }
+  .info-bio {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: #333;
+  }
+  .info-bio p + p { margin-top: 20px; }
+  .info-contact {
+    margin-top: auto;
+  }
+  .info-contact-label {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+  .info-contact a {
+    font-size: 14px;
+    color: #111;
+    text-decoration: none;
+  }
+  .info-contact a:hover { opacity: 0.4; }
+  .info-overlay {
+    display: none;
     position: fixed;
     inset: 0;
-    background: var(--menu-bg);
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+    z-index: 150;
+    background: transparent;
   }
-  .menu-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .menu-overlay-top {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 28px;
-  }
-  .menu-logo {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #ffffff;
-  }
-  .menu-close {
-    position: absolute;
-    right: 28px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #ffffff;
-    font-size: 30px;
-    font-weight: 300;
-    line-height: 1;
-    font-family: inherit;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-  }
-  .menu-close:hover { opacity: 1; }
-  .menu-links {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .menu-links a {
-    font-size: clamp(36px, 8vw, 60px);
-    font-weight: 400;
-    color: #ffffff;
-    text-decoration: none;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
-    transition: opacity 0.15s;
-  }
-  .menu-links a:hover { opacity: 0.35; }
-
-  /* ── PAGE ── */
-  .page { padding-top: 62px; }
-
-  /* ── MANIFESTO ── */
-  .manifesto {
-    padding: 80px 28px 72px;
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .manifesto p {
-    font-size: clamp(20px, 3.5vw, 30px);
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
+  .info-overlay.open { display: block; }
 
   /* ── WORK FEED ── */
-  .work-feed { display: flex; flex-direction: column; }
+  .feed {
+    padding-top: 54px;
+  }
 
-  .work-item {
-    position: relative;
+  .piece {
     width: 100%;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .piece-media {
+    width: 100%;
+    height: 90vh;
+    position: relative;
     overflow: hidden;
-    border-bottom: 1px solid var(--border);
+    background: #f2f2f0;
+    display: block;
   }
 
-  /* 3D canvases */
-  .model-viewer-wrap {
+  .piece-media img {
     width: 100%;
-    height: clamp(320px, 56vw, 620px);
-    position: relative;
-    background: var(--surface);
+    height: 100%;
+    object-fit: cover;
     display: block;
   }
-  .model-viewer-wrap canvas {
-    display: block;
+
+  .piece-media canvas {
     position: absolute;
     inset: 0;
     width: 100% !important;
     height: 100% !important;
-  }
-
-  /* render images */
-  .work-item-render img {
-    width: 100%;
-    height: clamp(320px, 60vw, 680px);
-    object-fit: cover;
     display: block;
-    transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  .work-item-render:hover img { transform: scale(1.025); }
 
-  /* caption overlay */
-  .work-caption {
+  .piece-media model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+    background-color: transparent;
+  }
+
+  /* loader */
+  .loader {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 56px 28px 22px;
-    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%);
+    inset: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.5s;
   }
-  .work-caption-sub {
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.55);
-    margin-bottom: 5px;
+  .loader.gone { opacity: 0; }
+  .loader-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #aaa;
+    animation: blink 1.2s ease-in-out infinite;
   }
-  .work-caption-title {
-    font-size: clamp(17px, 2.8vw, 26px);
-    font-weight: 600;
-    color: #ffffff;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-  }
-  .work-caption-num {
-    font-size: 10px;
-    color: rgba(255,255,255,0.35);
-    letter-spacing: 0.12em;
-    flex-shrink: 0;
-    margin-left: 16px;
+  @keyframes blink {
+    0%,100% { opacity: 0.2; } 50% { opacity: 1; }
   }
 
   /* drag hint */
   .drag-hint {
     position: absolute;
-    top: 18px;
+    bottom: 18px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
-    letter-spacing: 0.18em;
-    color: rgba(0,0,0,0.25);
-    text-transform: uppercase;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    white-space: nowrap;
-    z-index: 3;
-  }
-  .work-item:hover .drag-hint { opacity: 0; }
-
-  /* loader */
-  .loader-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface);
-    transition: opacity 0.6s;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .loader-overlay.hidden { opacity: 0; }
-  .loader-dot {
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: var(--light);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 0.2; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.2); }
-  }
-
-  /* ── ABOUT ── */
-  .about-wrap {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 80px 28px 72px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-label {
-    font-size: 10px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--light);
-    margin-bottom: 32px;
+    color: rgba(0,0,0,0.22);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+    z-index: 3;
   }
-  .about-wrap p {
-    font-size: 16px;
-    color: var(--muted);
-    line-height: 1.8;
-    font-weight: 300;
-    margin-bottom: 16px;
-  }
-  .about-wrap p:last-of-type { margin-bottom: 0; }
-  .stats {
-    display: flex;
-    gap: 52px;
-    margin-top: 52px;
-    padding-top: 40px;
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .stat-num {
-    font-size: 44px;
-    font-weight: 300;
-    color: var(--text);
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-  .stat-label {
-    margin-top: 6px;
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--light);
-  }
+  .piece:hover .drag-hint { opacity: 0; }
 
-  /* ── CONTACT ── */
-  .contact-wrap {
-    padding: 80px 28px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
+  /* caption */
+  .piece-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 28px 15px;
   }
-  .contact-wrap .section-label { margin-bottom: 18px; }
-  .contact-wrap h3 {
-    font-size: clamp(22px, 4vw, 36px);
+  .piece-title {
+    font-size: 13px;
     font-weight: 400;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    margin-bottom: 36px;
-    line-height: 1.25;
+    color: #111;
+    letter-spacing: 0.01em;
   }
-  .contact-link {
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-weight: 500;
-    color: var(--text);
-    text-decoration: none;
-    border-bottom: 1px solid var(--text);
-    padding-bottom: 3px;
-    transition: opacity 0.2s;
+  .piece-meta {
+    font-size: 11px;
+    color: #aaa;
+    letter-spacing: 0.08em;
   }
-  .contact-link:hover { opacity: 0.35; }
 
   /* ── FOOTER ── */
   footer {
-    padding: 18px 28px;
+    padding: 28px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   footer span {
     font-size: 11px;
-    color: var(--light);
+    color: #ccc;
     letter-spacing: 0.06em;
   }
 
@@ -352,16 +220,15 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.94);
-    z-index: 1000;
+    background: rgba(0,0,0,0.93);
+    z-index: 500;
     align-items: center;
     justify-content: center;
-    padding: 40px;
     cursor: zoom-out;
   }
   .lightbox.active { display: flex; }
   .lightbox img {
-    max-width: 100%;
+    max-width: 92vw;
     max-height: 90vh;
     object-fit: contain;
     cursor: default;
@@ -369,83 +236,23 @@
   .lightbox-close {
     position: absolute;
     top: 20px; right: 28px;
-    font-size: 28px;
-    color: rgba(255,255,255,0.5);
+    font-size: 26px;
+    color: rgba(255,255,255,0.45);
     cursor: pointer;
     font-weight: 300;
-    line-height: 1;
     background: none;
     border: none;
     font-family: inherit;
-    transition: color 0.2s;
+    line-height: 1;
   }
   .lightbox-close:hover { color: #fff; }
-  .lightbox-caption {
-    position: absolute;
-    bottom: 24px;
-    left: 0; right: 0;
-    text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,0.3);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
 
-  /* ── INTERACTIVE ── */
-  .interactive-wrap {
-    background: #0e0e0e;
-    color: #ffffff;
-    padding: 80px 28px 72px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .interactive-wrap .section-label {
-    color: rgba(255,255,255,0.3);
-    margin-bottom: 16px;
-  }
-  .interactive-title {
-    font-size: clamp(28px, 5vw, 52px);
-    font-weight: 300;
-    letter-spacing: -0.03em;
-    color: #ffffff;
-    margin-bottom: 48px;
-    text-align: center;
-  }
-  .interactive-viewer-wrap {
-    width: 100%;
-    max-width: 900px;
-    height: clamp(480px, 70vw, 720px);
-    border-radius: 4px;
-    overflow: hidden;
-    background: #181818;
-  }
-  .interactive-viewer-wrap model-viewer {
-    width: 100%;
-    height: 100%;
-    --poster-color: transparent;
-    background-color: transparent;
-  }
-  .interactive-hint {
-    margin-top: 20px;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
-    text-align: center;
-  }
-
-  /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
-    .manifesto { padding: 52px 20px 48px; }
-    .work-caption { padding: 40px 18px 16px; }
-    .about-wrap { padding: 56px 20px; }
-    .contact-wrap { padding: 56px 20px; }
-    footer { padding: 16px 20px; }
-    .stats { gap: 32px; }
-    nav { padding: 18px 20px; }
-    .nav-menu-btn { right: 20px; }
+    nav { padding: 16px 20px; }
+    .piece-caption { padding: 12px 20px 14px; }
+    .piece-media { height: 70vh; }
+    .info-panel { padding: 72px 24px 40px; }
+    footer { padding: 22px 20px; }
   }
 </style>
 </head>
@@ -453,130 +260,109 @@
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightbox-close">×</button>
-  <img id="lightbox-img" src="" alt="">
-  <div class="lightbox-caption" id="lightbox-caption"></div>
+  <button class="lightbox-close" id="lb-close">×</button>
+  <img id="lb-img" src="" alt="">
 </div>
 
-<!-- MENU OVERLAY -->
-<div class="menu-overlay" id="menu-overlay" aria-hidden="true">
-  <div class="menu-overlay-top">
-    <span class="menu-logo">Justin Best</span>
-    <button class="menu-close" id="menu-close" aria-label="Close menu">×</button>
+<!-- INFO OVERLAY (click-away) -->
+<div class="info-overlay" id="info-overlay"></div>
+
+<!-- INFO PANEL -->
+<div class="info-panel" id="info-panel">
+  <button class="info-close" id="info-close">×</button>
+  <div class="info-bio">
+    <p>Justin Best is a digital sculptor working at the intersection of mathematics and visual art.</p>
+    <p>Each piece begins as an equation and ends as something you can hold with your eyes. The focus is on how light interacts with geometry — the way a surface catches and releases illumination.</p>
   </div>
-  <div class="menu-links">
-    <a href="#work" class="menu-nav-link">Work</a>
-    <a href="#interactive" class="menu-nav-link">Interactive</a>
-    <a href="#about" class="menu-nav-link">About</a>
-    <a href="#contact" class="menu-nav-link">Contact</a>
+  <div class="info-contact">
+    <div class="info-contact-label">Contact</div>
+    <a href="mailto:hello@justinbest.com">hello@justinbest.com</a>
   </div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">Justin Best</div>
-  <button class="nav-menu-btn" id="menu-open" aria-label="Open menu">
-    <span></span>
-    <span></span>
-  </button>
+  <a class="nav-name" href="#">Justin Best</a>
+  <span class="nav-info" id="info-open">Info</span>
 </nav>
 
-<div class="page">
+<!-- WORK FEED -->
+<div class="feed">
 
-  <!-- MANIFESTO -->
-  <div class="manifesto">
-    <p>Portraits of unbuilt geometry.<br>Exploring form, light, and the mathematics of space.</p>
+  <!-- 01 — GLB sculpture -->
+  <div class="piece">
+    <div class="piece-media" id="wrap-glb">
+      <div class="loader" id="loader-glb"><div class="loader-dot"></div></div>
+      <canvas id="c-glb"></canvas>
+      <div class="drag-hint">Drag to rotate</div>
+    </div>
+    <div class="piece-caption">
+      <span class="piece-title">Lone Peak Chandelier</span>
+      <span class="piece-meta">3D sculpture &nbsp;·&nbsp; 2025</span>
+    </div>
   </div>
 
-  <!-- WORK FEED -->
-  <div class="work-feed" id="work">
-
-    <div class="work-item work-item-3d">
-      <div class="model-viewer-wrap" id="wrap-glb">
-        <div class="loader-overlay" id="loader-glb"><div class="loader-dot"></div></div>
-        <canvas id="c-glb"></canvas>
-        <div class="drag-hint">Drag to rotate</div>
-      </div>
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Original sculpture</div>
-          <div class="work-caption-title">Lone Peak Chandelier</div>
-        </div>
-        <div class="work-caption-num">001</div>
-      </div>
+  <!-- 02 — Paris Reimagined -->
+  <div class="piece piece-img" data-title="Paris Reimagined" data-src="paris-reimagined.png">
+    <div class="piece-media">
+      <img src="paris-reimagined.png" alt="Paris Reimagined" loading="lazy">
     </div>
-
-    <div class="work-item work-item-render" data-title="Paris Reimagined">
-      <img src="paris-reimagined.png" alt="Paris Reimagined — Environment Design" loading="lazy">
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Environment design</div>
-          <div class="work-caption-title">Paris Reimagined</div>
-        </div>
-        <div class="work-caption-num">005</div>
-      </div>
+    <div class="piece-caption">
+      <span class="piece-title">Paris Reimagined</span>
+      <span class="piece-meta">Environment design &nbsp;·&nbsp; 2025</span>
     </div>
+  </div>
 
-    <div class="work-item work-item-3d">
-      <div class="model-viewer-wrap">
-        <canvas id="c1"></canvas>
-        <div class="drag-hint">Drag to rotate</div>
-      </div>
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Dodecahedron</div>
-          <div class="work-caption-title">Geometric Form I</div>
-        </div>
-        <div class="work-caption-num">002</div>
-      </div>
+  <!-- 03 — Geometric Form -->
+  <div class="piece">
+    <div class="piece-media">
+      <canvas id="c1"></canvas>
+      <div class="drag-hint">Drag to rotate</div>
     </div>
+    <div class="piece-caption">
+      <span class="piece-title">Geometric Form I</span>
+      <span class="piece-meta">Dodecahedron &nbsp;·&nbsp; 2025</span>
+    </div>
+  </div>
 
-    <div class="work-item work-item-render" data-title="Futurist Inaugura">
+  <!-- 04 — Futurist Inaugura -->
+  <div class="piece piece-img" data-title="Futurist Inaugura" data-src="futurist-inaugura.png">
+    <div class="piece-media">
       <img src="futurist-inaugura.png" alt="Futurist Inaugura" loading="lazy">
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Concept art</div>
-          <div class="work-caption-title">Futurist Inaugura</div>
-        </div>
-        <div class="work-caption-num">006</div>
-      </div>
     </div>
-
-    <div class="work-item work-item-3d">
-      <div class="model-viewer-wrap">
-        <canvas id="c2"></canvas>
-        <div class="drag-hint">Drag to rotate</div>
-      </div>
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Knot geometry</div>
-          <div class="work-caption-title">Torus Variation</div>
-        </div>
-        <div class="work-caption-num">003</div>
-      </div>
+    <div class="piece-caption">
+      <span class="piece-title">Futurist Inaugura</span>
+      <span class="piece-meta">Concept art &nbsp;·&nbsp; 2025</span>
     </div>
-
-    <div class="work-item work-item-3d">
-      <div class="model-viewer-wrap">
-        <canvas id="c3"></canvas>
-        <div class="drag-hint">Drag to rotate</div>
-      </div>
-      <div class="work-caption">
-        <div>
-          <div class="work-caption-sub">Crystal cluster</div>
-          <div class="work-caption-title">Crystalline Study</div>
-        </div>
-        <div class="work-caption-num">004</div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- INTERACTIVE -->
-  <div id="interactive" class="interactive-wrap">
-    <div class="section-label">Interactive</div>
-    <h2 class="interactive-title">Walking Figure</h2>
-    <div class="interactive-viewer-wrap">
+  <!-- 05 — Torus Variation -->
+  <div class="piece">
+    <div class="piece-media">
+      <canvas id="c2"></canvas>
+      <div class="drag-hint">Drag to rotate</div>
+    </div>
+    <div class="piece-caption">
+      <span class="piece-title">Torus Variation</span>
+      <span class="piece-meta">Knot geometry &nbsp;·&nbsp; 2025</span>
+    </div>
+  </div>
+
+  <!-- 06 — Crystalline Study -->
+  <div class="piece">
+    <div class="piece-media">
+      <canvas id="c3"></canvas>
+      <div class="drag-hint">Drag to rotate</div>
+    </div>
+    <div class="piece-caption">
+      <span class="piece-title">Crystalline Study</span>
+      <span class="piece-meta">Crystal cluster &nbsp;·&nbsp; 2025</span>
+    </div>
+  </div>
+
+  <!-- 07 — Walking Figure (interactive) -->
+  <div class="piece">
+    <div class="piece-media" style="background:#111;">
       <model-viewer
         src="Tennis5.glb"
         autoplay
@@ -584,96 +370,53 @@
         camera-controls
         auto-rotate
         auto-rotate-delay="0"
-        shadow-intensity="0.8"
+        shadow-intensity="0.6"
         exposure="1.1"
         alt="Animated 3D walking figure">
       </model-viewer>
     </div>
-    <p class="interactive-hint">Drag to orbit &middot; Scroll to zoom &middot; Animation plays automatically</p>
-  </div>
-
-  <!-- ABOUT -->
-  <div id="about" class="about-wrap">
-    <div class="section-label">About</div>
-    <p>Justin Best is a digital sculptor working at the intersection of mathematics and visual art. Each piece begins as an equation and ends as something you can hold with your eyes.</p>
-    <p>Working primarily in 3D space, the focus is on how light interacts with geometry — the way a surface catches and releases illumination, and how that creates an emotional response.</p>
-    <div class="stats">
-      <div>
-        <div class="stat-num">48</div>
-        <div class="stat-label">Works in collection</div>
-      </div>
-      <div>
-        <div class="stat-num">6</div>
-        <div class="stat-label">Years exploring form</div>
-      </div>
-      <div>
-        <div class="stat-num">12</div>
-        <div class="stat-label">Exhibitions &amp; features</div>
-      </div>
+    <div class="piece-caption">
+      <span class="piece-title">Walking Figure</span>
+      <span class="piece-meta">Animated 3D &nbsp;·&nbsp; 2025</span>
     </div>
   </div>
 
-  <!-- CONTACT -->
-  <div id="contact" class="contact-wrap">
-    <div class="section-label">Let's work together</div>
-    <h3>Commissions, collaborations,<br>and inquiries welcome.</h3>
-    <a class="contact-link" href="mailto:hello@justinbest.com">hello@justinbest.com</a>
-  </div>
+</div><!-- /feed -->
 
-  <footer>
-    <span>© 2026 Justin Best</span>
-    <span>Built with Three.js</span>
-  </footer>
-
-</div><!-- /page -->
+<footer>
+  <span>© 2026 Justin Best</span>
+  <span>3D Art</span>
+</footer>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const GLB_B64 = "Z2xURgIAAAAUEgAAWAgAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Iktocm9ub3MgZ2xURiBCbGVuZGVyIEkvTyB2NS4xLjE4IiwidmVyc2lvbiI6IjIuMCJ9LCJzY2VuZSI6MCwic2NlbmVzIjpbeyJuYW1lIjoiU2NlbmUiLCJub2RlcyI6WzAsMV19XSwibm9kZXMiOlt7Im1lc2giOjAsIm5hbWUiOiJQbGFuZS4wMDEiLCJyb3RhdGlvbiI6Wy0xLDAsMCwxLjYyOTIwNjg0OTQyOTQ2NTRlLTA3XSwic2NhbGUiOlswLjY5NDIzMjQwNDIzMjAyNTEsMC41MjA2NDAxOTQ0MTYwNDYxLDAuNTIwNjQwMDE1NjAyMTExOF0sInRyYW5zbGF0aW9uIjpbLTMxLjEzNDY0NzM2OTM4NDc2NiwtMS44NzYyOTEwMzY2MDU4MzUsLTE1LjAwMDIwMzEzMjYyOTM5NV19LHsibWVzaCI6MCwibmFtZSI6IlBsYW5lLjAwMyIsInJvdGF0aW9uIjpbLTEsMCwwLDEuNjI5MjA2ODQ5NDI5NDY1NGUtMDddLCJzY2FsZSI6WzAuNjk0MjMyNDA0MjMyMDI1MSwwLjUyMDY0MDE5NDQxNjA0NjEsMC41MjA2NDAxOTQ0MTYwNDYxXSwidHJhbnNsYXRpb24iOlstMzEuMTM0NjQ3MzY5Mzg0NzY2LC0xLjg3NjI5MTAzNjYwNTgzNSwtMTUuMDAwMjAzMTMyNjI5Mzk1XX1dLCJtYXRlcmlhbHMiOlt7ImRvdWJsZVNpZGVkIjp0cnVlLCJuYW1lIjoiTWF0ZXJpYWwiLCJwYnJNZXRhbGxpY1JvdWdobmVzcyI6eyJiYXNlQ29sb3JGYWN0b3IiOlswLjgwMDAwMDAxMTkyMDkyOSwwLjgwMDAwMDAxMTkyMDkyOSwwLjgwMDAwMDAxMTkyMDkyOSwxXSwibWV0YWxsaWNGYWN0b3IiOjAsInJvdWdobmVzc0ZhY3RvciI6MC41fX1dLCJtZXNoZXMiOlt7ImV4dHJhcyI6eyJ0YXJnZXROYW1lcyI6WyJLZXkgMSJdfSwibmFtZSI6IlBsYW5lLjAwMiIsInByaW1pdGl2ZXMiOlt7ImF0dHJpYnV0ZXMiOnsiUE9TSVRJT04iOjAsIk5PUk1BTCI6MSwiVEVYQ09PUkRfMCI6Mn0sImluZGljZXMiOjMsIm1hdGVyaWFsIjowLCJ0YXJnZXRzIjpbeyJQT1NJVElPTiI6NCwiTk9STUFMIjo1fV19XSwid2VpZ2h0cyI6WzFdfV0sImFjY2Vzc29ycyI6W3siYnVmZmVyVmlldyI6MCwiY29tcG9uZW50VHlwZSI6NTEyNiwiY291bnQiOjQ4LCJtYXgiOlszLjIzOTA5NDQ5NTc3MzMxNTQsNy40NTA1ODA1OTY5MjM4MjhlLTA4LDExLjEwODY2NjQxOTk4MjkxXSwibWluIjpbLTMuMzg2MTA2MjUyNjcwMjg4LDcuNDUwNTgwNTk2OTIzODI4ZS0wOCwtMzUuMTY0NjcyODUxNTYyNV0sInR5cGUiOiJWRUMzIn0seyJidWZmZXJWaWV3IjoxLCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsInR5cGUiOiJWRUMzIn0seyJidWZmZXJWaWV3IjoyLCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsInR5cGUiOiJWRUMyIn0seyJidWZmZXJWaWV3IjozLCJjb21wb25lbnRUeXBlIjo1MTIzLCJjb3VudCI6MTY4LCJ0eXBlIjoiU0NBTEFSIn0seyJidWZmZXJWaWV3Ijo0LCJjb21wb25lbnRUeXBlIjo1MTI2LCJjb3VudCI6NDgsIm1heCI6WzAuNzM0OTMwMjc2ODcwNzI3NSwwLDEuNzA0MjQ4NDI4MzQ0NzI2Nl0sIm1pbiI6Wy0xLjMxMzA4NzcwMTc5NzQ4NTQsMCwtMS43OTAwNTQzMjEyODkwNjI1XSwidHlwZSI6IlZFQzMifSx7ImNvbXBvbmVudFR5cGUiOjUxMjYsImNvdW50Ijo0OCwic3BhcnNlIjp7ImNvdW50IjoxLCJpbmRpY2VzIjp7ImJ1ZmZlclZpZXciOjUsImNvbXBvbmVudFR5cGUiOjUxMjF9LCJ2YWx1ZXMiOnsiYnVmZmVyVmlldyI6Nn19LCJ0eXBlIjoiVkVDMyJ9XSwiYnVmZmVyVmlld3MiOlt7ImJ1ZmZlciI6MCwiYnl0ZUxlbmd0aCI6NTc2LCJieXRlT2Zmc2V0IjowLCJ0YXJnZXQiOjM0OTYyfSx7ImJ1ZmZlciI6MCwiYnl0ZUxlbmd0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";
 
-/* ── MENU ── */
+/* ── INFO PANEL ── */
 (function(){
-  const overlay = document.getElementById('menu-overlay');
-  const openBtn  = document.getElementById('menu-open');
-  const closeBtn = document.getElementById('menu-close');
-  function open() {
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden','false');
-    document.body.style.overflow = 'hidden';
-  }
-  function close() {
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow = '';
-  }
+  const panel   = document.getElementById('info-panel');
+  const overlay = document.getElementById('info-overlay');
+  const openBtn = document.getElementById('info-open');
+  const closeBtn= document.getElementById('info-close');
+  function open()  { panel.classList.add('open'); overlay.classList.add('open'); }
+  function close() { panel.classList.remove('open'); overlay.classList.remove('open'); }
   openBtn.addEventListener('click', open);
   closeBtn.addEventListener('click', close);
-  document.querySelectorAll('.menu-nav-link').forEach(a => a.addEventListener('click', close));
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 })();
 
 /* ── LIGHTBOX ── */
 (function(){
-  const lb = document.getElementById('lightbox');
-  const lbImg = document.getElementById('lightbox-img');
-  const lbCap = document.getElementById('lightbox-caption');
-  const lbClose = document.getElementById('lightbox-close');
-  function open(src, alt, title) {
-    lbImg.src = src; lbImg.alt = alt;
-    lbCap.textContent = title || alt;
-    lb.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function close() {
-    lb.classList.remove('active');
-    document.body.style.overflow = '';
-    setTimeout(() => { lbImg.src = ''; }, 300);
-  }
-  document.querySelectorAll('.work-item-render').forEach(card => {
-    card.addEventListener('click', () => {
-      const img = card.querySelector('img');
-      open(img.src, img.alt, card.getAttribute('data-title'));
-    });
+  const lb    = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lb-img');
+  const lbClose = document.getElementById('lb-close');
+  function open(src, alt) { lbImg.src = src; lbImg.alt = alt; lb.classList.add('active'); document.body.style.overflow = 'hidden'; }
+  function close() { lb.classList.remove('active'); document.body.style.overflow = ''; setTimeout(() => lbImg.src = '', 200); }
+  document.querySelectorAll('.piece-img').forEach(p => {
+    p.style.cursor = 'zoom-in';
+    p.addEventListener('click', () => open(p.dataset.src, p.dataset.title));
   });
   lbClose.addEventListener('click', close);
   lb.addEventListener('click', e => { if (e.target === lb) close(); });
@@ -691,15 +434,13 @@ function setupControls(canvas, card, getVel, setVel, getAuto, setAuto){
     lastX=e.clientX; lastY=e.clientY;
   });
   window.addEventListener('mouseup', () => { if(dragging){ dragging=false; setTimeout(()=>setAuto(true),2000); } });
-
   let touchIntent = null;
   card.addEventListener('touchstart', e => { touchIntent=null; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }, {passive:true});
   card.addEventListener('touchmove', e => {
     const dx=Math.abs(e.touches[0].clientX-lastX), dy=Math.abs(e.touches[0].clientY-lastY);
     if (touchIntent===null && (dx>4||dy>4)) touchIntent = dx>dy ? 'rotate' : 'scroll';
     if (touchIntent==='rotate') {
-      e.preventDefault();
-      dragging=true; setAuto(false);
+      e.preventDefault(); dragging=true; setAuto(false);
       const v=getVel();
       setVel(v.x+(e.touches[0].clientY-lastY)*0.012, v.y+(e.touches[0].clientX-lastX)*0.012);
       lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
@@ -716,10 +457,10 @@ function b64ToArrayBuffer(b64){
 
 function makeBasicScene(canvasId, createGeo){
   const canvas = document.getElementById(canvasId);
-  const card   = canvas.closest('.work-item');
-  const wrap   = canvas.closest('.model-viewer-wrap');
+  const card   = canvas.closest('.piece');
+  const wrap   = canvas.closest('.piece-media');
   const w = wrap.clientWidth  || 800;
-  const h = wrap.clientHeight || 500;
+  const h = wrap.clientHeight || 600;
   canvas.width = w; canvas.height = h;
   const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
   renderer.setSize(w, h);
@@ -728,16 +469,16 @@ function makeBasicScene(canvasId, createGeo){
   const scene  = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 100);
   camera.position.set(0, 0, 4.5);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const l1 = new THREE.DirectionalLight(0xffffff, 1.1); l1.position.set(2, 3, 3); scene.add(l1);
-  const l2 = new THREE.DirectionalLight(0xcccccc, 0.4); l2.position.set(-2,-1,-2); scene.add(l2);
-  const mesh = new THREE.Mesh(createGeo(), new THREE.MeshStandardMaterial({color:0x2a2a2a, metalness:0.5, roughness:0.3}));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const l1 = new THREE.DirectionalLight(0xffffff, 1.0); l1.position.set(2, 3, 3); scene.add(l1);
+  const l2 = new THREE.DirectionalLight(0xdddddd, 0.35); l2.position.set(-2,-1,-2); scene.add(l2);
+  const mesh = new THREE.Mesh(createGeo(), new THREE.MeshStandardMaterial({color:0x1a1a1a, metalness:0.55, roughness:0.25}));
   scene.add(mesh);
   let rotX=0.3, rotY=0.4, velX=0, velY=0, autoRotate=true;
   setupControls(canvas, card, ()=>({x:velX,y:velY}), (x,y)=>{velX=x;velY=y;}, ()=>autoRotate, v=>autoRotate=v);
   (function animate(){
     requestAnimationFrame(animate);
-    if(autoRotate) velY+=0.004;
+    if(autoRotate) velY+=0.003;
     velX*=0.92; velY*=0.92;
     rotX+=velX; rotY+=velY;
     mesh.rotation.x=rotX; mesh.rotation.y=rotY;
@@ -746,12 +487,12 @@ function makeBasicScene(canvasId, createGeo){
 }
 
 function loadGLBScene(){
-  const canvas   = document.getElementById('c-glb');
-  const card     = canvas.closest('.work-item');
-  const wrap     = document.getElementById('wrap-glb');
-  const loader_el= document.getElementById('loader-glb');
+  const canvas    = document.getElementById('c-glb');
+  const card      = canvas.closest('.piece');
+  const wrap      = document.getElementById('wrap-glb');
+  const loader_el = document.getElementById('loader-glb');
   const w = wrap.clientWidth  || 800;
-  const h = wrap.clientHeight || 500;
+  const h = wrap.clientHeight || 600;
   canvas.width = w; canvas.height = h;
   const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
   renderer.setSize(w, h);
@@ -785,11 +526,10 @@ function loadGLBScene(){
     if(p.attributes.NORMAL!=null) geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(getAccessorData(p.attributes.NORMAL)),3));
     if(p.indices!=null) geo.setIndex(new THREE.BufferAttribute(new Uint16Array(getAccessorData(p.indices)),1));
     if(!p.attributes.NORMAL) geo.computeVertexNormals();
-    group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:0x333333, metalness:0.4, roughness:0.4, side:THREE.DoubleSide})));
+    group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:0x222222, metalness:0.4, roughness:0.4, side:THREE.DoubleSide})));
   }));
 
   gltf.nodes.forEach(n=>{ if(n.rotation) group.quaternion.multiply(new THREE.Quaternion(n.rotation[0],n.rotation[1],n.rotation[2],n.rotation[3])); });
-
   const box    = new THREE.Box3().setFromObject(group);
   const center = box.getCenter(new THREE.Vector3());
   const size   = box.getSize(new THREE.Vector3());
@@ -797,13 +537,13 @@ function loadGLBScene(){
   group.position.sub(center.multiplyScalar(scale));
   group.scale.setScalar(scale);
   scene.add(group);
-  loader_el.classList.add('hidden');
+  loader_el.classList.add('gone');
 
   let rotX=0, rotY=0, velX=0, velY=0, autoRotate=true;
   setupControls(canvas, card, ()=>({x:velX,y:velY}), (x,y)=>{velX=x;velY=y;}, ()=>autoRotate, v=>autoRotate=v);
   (function animate(){
     requestAnimationFrame(animate);
-    if(autoRotate) velY+=0.004;
+    if(autoRotate) velY+=0.003;
     velX*=0.92; velY*=0.92;
     rotX+=velX; rotY+=velY;
     group.rotation.x=rotX; group.rotation.y=rotY;
